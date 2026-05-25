@@ -1,0 +1,243 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        x:Class="Sonix.MainWindow"
+        Title="SONIX"
+        Width="900" Height="620"
+        MinWidth="720" MinHeight="520"
+        Background="#0A0A0F"
+        TransparencyLevelHint="AcrylicBlur"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        WindowStartupLocation="CenterScreen">
+
+  <Window.Styles>
+    <Style Selector="Button.ctrl">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Padding" Value="8"/>
+    </Style>
+    <Style Selector="Button.ctrl:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#1AFFFFFF"/>
+      <Setter Property="CornerRadius" Value="50"/>
+    </Style>
+    <Style Selector="Slider">
+      <Setter Property="Foreground" Value="#7C3AED"/>
+    </Style>
+  </Window.Styles>
+
+  <Grid RowDefinitions="40,*,Auto">
+
+    <!-- Title Bar -->
+    <Grid Grid.Row="0" Background="#0A0A0F" PointerPressed="TitleBar_PointerPressed">
+      <TextBlock Text="SONIX" Foreground="#7C3AED" FontSize="13" FontWeight="Bold"
+                 LetterSpacing="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" Spacing="4">
+        <Button Name="MinBtn" Classes="ctrl" Width="28" Height="28" Click="MinBtn_Click">
+          <TextBlock Text="─" Foreground="#888" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Button>
+        <Button Name="MaxBtn" Classes="ctrl" Width="28" Height="28" Click="MaxBtn_Click">
+          <TextBlock Text="⬜" Foreground="#888" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Button>
+        <Button Name="CloseBtn" Classes="ctrl" Width="28" Height="28" Click="CloseBtn_Click">
+          <TextBlock Text="✕" Foreground="#888" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Button>
+      </StackPanel>
+    </Grid>
+
+    <!-- Main Content -->
+    <Grid Grid.Row="1" ColumnDefinitions="300,*">
+
+      <!-- Sidebar: Playlist -->
+      <Border Grid.Column="0" Background="#0F0F1A" BorderBrush="#1A1A2E" BorderThickness="0,0,1,0">
+        <Grid RowDefinitions="Auto,Auto,*">
+          <!-- Search -->
+          <Border Grid.Row="0" Margin="16,16,16,8" CornerRadius="8" Background="#1A1A2E">
+            <Grid ColumnDefinitions="Auto,*">
+              <TextBlock Grid.Column="0" Text="⌕" Foreground="#555" FontSize="16" Margin="10,0,0,0" VerticalAlignment="Center"/>
+              <TextBox Grid.Column="1" Name="SearchBox" Watermark="Search songs..."
+                       Background="Transparent" BorderThickness="0"
+                       Foreground="#CCC" CaretBrush="#7C3AED"
+                       Margin="8,6,8,6" FontSize="13"
+                       TextChanged="SearchBox_TextChanged"/>
+            </Grid>
+          </Border>
+
+          <!-- Playlist Header -->
+          <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="16,4,16,8">
+            <TextBlock Grid.Column="0" Text="PLAYLIST" Foreground="#555" FontSize="11"
+                       FontWeight="Bold" LetterSpacing="3" VerticalAlignment="Center"/>
+            <Button Grid.Column="1" Name="AddBtn" Classes="ctrl" Click="AddBtn_Click"
+                    ToolTip.Tip="Add Songs">
+              <TextBlock Text="+" Foreground="#7C3AED" FontSize="20" FontWeight="Bold"/>
+            </Button>
+          </Grid>
+
+          <!-- Song List -->
+          <ListBox Grid.Row="2" Name="PlaylistBox"
+                   Background="Transparent"
+                   SelectionChanged="PlaylistBox_SelectionChanged"
+                   Margin="8,0,8,8">
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <Grid ColumnDefinitions="Auto,*,Auto" Margin="4,6,4,6">
+                  <!-- Album Art Thumb -->
+                  <Border Grid.Column="0" Width="40" Height="40" CornerRadius="6"
+                          Background="#1A1A2E" Margin="0,0,10,0" ClipToBounds="True">
+                    <Panel>
+                      <TextBlock Text="♫" Foreground="#7C3AED" FontSize="16"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                      <Image Name="ThumbImage" Stretch="UniformToFill"
+                             IsVisible="{Binding HasAlbumArt}"/>
+                    </Panel>
+                  </Border>
+                  <!-- Info -->
+                  <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Title}" Foreground="#EEE" FontSize="13"
+                               FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="{Binding Artist}" Foreground="#666" FontSize="11"
+                               TextTrimming="CharacterEllipsis"/>
+                  </StackPanel>
+                  <!-- Duration -->
+                  <TextBlock Grid.Column="2" Text="{Binding Duration}" Foreground="#555"
+                             FontSize="11" VerticalAlignment="Center"/>
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+            <ListBox.Styles>
+              <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                <Setter Property="Background" Value="#1A7C3AED"/>
+                <Setter Property="CornerRadius" Value="8"/>
+              </Style>
+              <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                <Setter Property="Background" Value="#0FFFFFFF"/>
+                <Setter Property="CornerRadius" Value="8"/>
+              </Style>
+            </ListBox.Styles>
+          </ListBox>
+        </Grid>
+      </Border>
+
+      <!-- Right Panel: Player -->
+      <Grid Grid.Column="1" RowDefinitions="*,Auto,Auto">
+
+        <!-- Visualizer + Album Art -->
+        <Grid Grid.Row="0">
+          <!-- Spectrum Visualizer Canvas -->
+          <Canvas Name="SpectrumCanvas" Background="Transparent"/>
+
+          <!-- Album Art Center -->
+          <Border HorizontalAlignment="Center" VerticalAlignment="Center"
+                  Width="180" Height="180" CornerRadius="90"
+                  Background="#1A1A2E" ClipToBounds="True"
+                  BoxShadow="0 0 60 0 #667C3AED">
+            <Panel>
+              <TextBlock Text="♫" Foreground="#7C3AED" FontSize="60"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              <Image Name="AlbumArtImage" Stretch="UniformToFill"
+                     IsVisible="{Binding HasAlbumArt, FallbackValue=False}"/>
+            </Panel>
+          </Border>
+
+          <!-- Now Playing overlay top -->
+          <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,24,0,0">
+            <TextBlock Text="NOW PLAYING" Foreground="#7C3AED" FontSize="10"
+                       LetterSpacing="4" FontWeight="Bold" HorizontalAlignment="Center"/>
+          </StackPanel>
+        </Grid>
+
+        <!-- Metadata -->
+        <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="20,0,20,16" Spacing="4">
+          <TextBlock Name="TitleText" Text="Select a song" Foreground="#F0F0FF"
+                     FontSize="22" FontWeight="Bold" HorizontalAlignment="Center"
+                     TextTrimming="CharacterEllipsis" TextAlignment="Center"/>
+          <TextBlock Name="ArtistText" Text="—" Foreground="#7C3AED"
+                     FontSize="14" HorizontalAlignment="Center"/>
+          <TextBlock Name="AlbumText" Text="" Foreground="#555"
+                     FontSize="12" HorizontalAlignment="Center"/>
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="16" Margin="0,6,0,0">
+            <TextBlock Name="BitrateText" Text="" Foreground="#444" FontSize="11"/>
+            <TextBlock Name="SampleRateText" Text="" Foreground="#444" FontSize="11"/>
+            <TextBlock Name="ChannelsText" Text="" Foreground="#444" FontSize="11"/>
+          </StackPanel>
+        </StackPanel>
+
+        <!-- Controls -->
+        <Border Grid.Row="2" Background="#0F0F1A" Padding="20,16,20,20">
+          <StackPanel Spacing="12">
+
+            <!-- Progress Bar -->
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <TextBlock Grid.Column="0" Name="CurrentTimeText" Text="0:00"
+                         Foreground="#666" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,0"/>
+              <Slider Grid.Column="1" Name="ProgressSlider" Minimum="0" Maximum="100" Value="0"
+                      PointerPressed="ProgressSlider_PointerPressed"
+                      PointerReleased="ProgressSlider_PointerReleased"/>
+              <TextBlock Grid.Column="2" Name="TotalTimeText" Text="0:00"
+                         Foreground="#666" FontSize="11" VerticalAlignment="Center" Margin="8,0,0,0"/>
+            </Grid>
+
+            <!-- Buttons Row -->
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,*">
+              <!-- Shuffle -->
+              <Button Grid.Column="0" Name="ShuffleBtn" Classes="ctrl" HorizontalAlignment="Right"
+                      Click="ShuffleBtn_Click" ToolTip.Tip="Shuffle">
+                <TextBlock Name="ShuffleIcon" Text="⇄" Foreground="#555" FontSize="18"/>
+              </Button>
+              <!-- Prev -->
+              <Button Grid.Column="1" Classes="ctrl" Click="PrevBtn_Click" Margin="8,0">
+                <TextBlock Text="⏮" Foreground="#CCC" FontSize="22"/>
+              </Button>
+              <!-- Play/Pause -->
+              <Button Grid.Column="2" Name="PlayPauseBtn" Classes="ctrl"
+                      Click="PlayPauseBtn_Click" Margin="4,0">
+                <Border Background="#7C3AED" CornerRadius="50" Width="52" Height="52">
+                  <TextBlock Name="PlayPauseIcon" Text="▶" Foreground="White"
+                             FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Margin="4,0,0,0"/>
+                </Border>
+              </Button>
+              <!-- Next -->
+              <Button Grid.Column="3" Classes="ctrl" Click="NextBtn_Click" Margin="8,0">
+                <TextBlock Text="⏭" Foreground="#CCC" FontSize="22"/>
+              </Button>
+              <!-- Repeat -->
+              <Button Grid.Column="4" Name="RepeatBtn" Classes="ctrl" HorizontalAlignment="Left"
+                      Click="RepeatBtn_Click" ToolTip.Tip="Repeat">
+                <TextBlock Name="RepeatIcon" Text="↻" Foreground="#555" FontSize="18"/>
+              </Button>
+
+              <!-- Volume -->
+              <StackPanel Grid.Column="6" Orientation="Horizontal" VerticalAlignment="Center"
+                          HorizontalAlignment="Right" Spacing="6">
+                <Button Name="MuteBtn" Classes="ctrl" Click="MuteBtn_Click">
+                  <TextBlock Name="VolumeIcon" Text="🔊" FontSize="16"/>
+                </Button>
+                <Slider Name="VolumeSlider" Minimum="0" Maximum="100" Value="80"
+                        Width="90" VerticalAlignment="Center"
+                        ValueChanged="VolumeSlider_ValueChanged"/>
+              </StackPanel>
+            </Grid>
+
+          </StackPanel>
+        </Border>
+
+      </Grid>
+    </Grid>
+
+    <!-- Status Bar -->
+    <Border Grid.Row="2" Background="#080810" Padding="16,4">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Grid.Column="0" Name="StatusText" Text="Ready · Add songs to begin"
+                   Foreground="#333" FontSize="11" VerticalAlignment="Center"/>
+        <TextBlock Grid.Column="1" Text="SONIX v1.0" Foreground="#222"
+                   FontSize="11" VerticalAlignment="Center"/>
+      </Grid>
+    </Border>
+
+  </Grid>
+</Window>
